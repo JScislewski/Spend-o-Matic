@@ -94,22 +94,48 @@ window.updateChart = function() {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-	// Add event listeners to tab view inputs for totals
+
+	// Add event listeners to tab view inputs for totals and persistence
 	const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+	function saveData() {
+		const data = {};
+		months.forEach(month => {
+			data[`income-${month}`] = document.getElementById(`income-${month}`)?.value || '';
+			data[`expenses-${month}`] = document.getElementById(`expenses-${month}`)?.value || '';
+		});
+		localStorage.setItem('spendomatic-data', JSON.stringify(data));
+	}
+	function loadData() {
+		const data = JSON.parse(localStorage.getItem('spendomatic-data') || '{}');
+		months.forEach(month => {
+			if (data[`income-${month}`] !== undefined) {
+				document.getElementById(`income-${month}`)?.setAttribute('value', data[`income-${month}`]);
+				document.getElementById(`income-${month}`)?.dispatchEvent(new Event('input'));
+			}
+			if (data[`expenses-${month}`] !== undefined) {
+				document.getElementById(`expenses-${month}`)?.setAttribute('value', data[`expenses-${month}`]);
+				document.getElementById(`expenses-${month}`)?.dispatchEvent(new Event('input'));
+			}
+		});
+	}
 	months.forEach(month => {
 		const incomeInput = document.getElementById(`income-${month}`);
 		const expensesInput = document.getElementById(`expenses-${month}`);
-		if (incomeInput) incomeInput.addEventListener('input', window.updateTotals);
-		if (expensesInput) expensesInput.addEventListener('input', window.updateTotals);
+		if (incomeInput) {
+			incomeInput.addEventListener('input', () => {
+				window.updateTotals();
+				saveData();
+			});
+		}
+		if (expensesInput) {
+			expensesInput.addEventListener('input', () => {
+				window.updateTotals();
+				saveData();
+			});
+		}
 	});
-	const incomeFields = [
-		'income-january','income-february','income-march','income-april','income-may','income-june',
-		'income-july','income-august','income-september','income-october','november','income-december'
-	];
-	const expensesFields = [
-		'expenses-january','expenses-february','expenses-march','expenses-april','expenses-may','expenses-june',
-		'expenses-july','expenses-august','expenses-september','expenses-october','expenses-november','expenses-december'
-	];
+	loadData();
+
 	// Initialize chart if chart tab is visible on load
 	if (document.getElementById('chart').classList.contains('show')) {
 		setTimeout(window.updateChart, 100);
