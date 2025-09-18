@@ -1,134 +1,56 @@
+import { saveData, loadData } from './persistence.js';
+import { updateChart, createChart } from './chart.js';
+import { calculateTotals } from './totals.js';
+
 let chart;
-// Make functions globally accessible for split view
+const incomeFields = [
+	'income-january','income-february','income-march','income-april','income-may','income-june',
+	'income-july','income-august','income-september','income-october','income-november','income-december'
+];
+const expensesFields = [
+	'expenses-january','expenses-february','expenses-march','expenses-april','expenses-may','expenses-june',
+	'expenses-july','expenses-august','expenses-september','expenses-october','expenses-november','expenses-december'
+];
+const monthLabels = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
 window.updateTotals = function() {
-	const incomeFields = [
-		'income-january','income-february','income-march','income-april','income-may','income-june',
-		'income-july','income-august','income-september','income-october','income-november','income-december'
-	];
-	const expensesFields = [
-		'expenses-january','expenses-february','expenses-march','expenses-april','expenses-may','expenses-june',
-		'expenses-july','expenses-august','expenses-september','expenses-october','expenses-november','expenses-december'
-	];
-	
-	let totalIncome = 0;
-	let totalExpenses = 0;
-	incomeFields.forEach(id => {
-		const val = parseFloat(document.getElementById(id)?.value) || 0;
-		totalIncome += val;
-	});
-	expensesFields.forEach(id => {
-		const val = parseFloat(document.getElementById(id)?.value) || 0;
-		totalExpenses += val;
-	});
-	document.getElementById('total-income').textContent = totalIncome.toFixed(2);
-	document.getElementById('total-expenses').textContent = totalExpenses.toFixed(2);
+	const totals = calculateTotals(incomeFields, expensesFields);
+	document.getElementById('total-income').textContent = totals.totalIncome.toFixed(2);
+	document.getElementById('total-expenses').textContent = totals.totalExpenses.toFixed(2);
 	window.updateChart();
 };
 
 window.updateChart = function() {
-	const incomeFields = [
-		'income-january','income-february','income-march','income-april','income-may','income-june',
-		'income-july','income-august','income-september','income-october','income-november','income-december'
-	];
-	const expensesFields = [
-		'expenses-january','expenses-february','expenses-march','expenses-april','expenses-may','expenses-june',
-		'expenses-july','expenses-august','expenses-september','expenses-october','expenses-november','expenses-december'
-	];
-	const monthLabels = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-	
 	const incomeData = incomeFields.map(id => parseFloat(document.getElementById(id)?.value) || 0);
 	const expensesData = expensesFields.map(id => parseFloat(document.getElementById(id)?.value) || 0);
 	const ctx = document.getElementById('incomeExpensesChart');
 	if (!ctx) return;
-	// If chart exists but canvas was replaced, destroy and recreate
 	if (chart && chart.canvas !== ctx) {
 		chart.destroy();
 		chart = null;
 	}
 	if (!chart) {
-		chart = new Chart(ctx, {
-			type: 'bar',
-			data: {
-				labels: monthLabels,
-				datasets: [
-					{
-						label: 'Income',
-						data: incomeData,
-						backgroundColor: 'rgb(40, 167, 69)',
-						borderColor: 'rgba(40, 167, 69, 1)',
-						borderWidth: 1
-					},
-					{
-						label: 'Expenses',
-						data: expensesData,
-						backgroundColor: 'rgb(220, 53, 69)',
-						borderColor: 'rgba(220, 53, 69, 1)',
-						borderWidth: 1
-					}
-				]
-			},
-			options: {
-				responsive: true,
-				plugins: {
-					legend: { position: 'top' },
-					title: { display: false }
-				},
-				scales: {
-					x: {
-						stacked: false,
-						grid: { color: '#fff' }
-					},
-					y: {
-						beginAtZero: true,
-						grid: { color: '#fff' }
-					}
-				}
-			}
-		});
+		chart = createChart(ctx, monthLabels, incomeData, expensesData);
 		window.chart = chart;
 	} else {
-		chart.data.datasets[0].data = incomeData;
-		chart.data.datasets[1].data = expensesData;
-		chart.update();
+		updateChart(chart, incomeData, expensesData, monthLabels);
 	}
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-
-	// Add event listeners to tab view inputs for totals and persistence
-	const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-	function saveData() {
-		const data = {};
-		months.forEach(month => {
-			data[`income-${month}`] = document.getElementById(`income-${month}`)?.value || '';
-			data[`expenses-${month}`] = document.getElementById(`expenses-${month}`)?.value || '';
-		});
-		localStorage.setItem('spendomatic-data', JSON.stringify(data));
-	}
-	function loadData() {
-		const data = JSON.parse(localStorage.getItem('spendomatic-data') || '{}');
-		months.forEach(month => {
-			if (data[`income-${month}`] !== undefined) {
-				document.getElementById(`income-${month}`)?.setAttribute('value', data[`income-${month}`]);
-				document.getElementById(`income-${month}`)?.dispatchEvent(new Event('input'));
-			}
-			if (data[`expenses-${month}`] !== undefined) {
-				document.getElementById(`expenses-${month}`)?.setAttribute('value', data[`expenses-${month}`]);
-				document.getElementById(`expenses-${month}`)?.dispatchEvent(new Event('input'));
-			}
-		});
-	}
-	months.forEach(month => {
-		const incomeInput = document.getElementById(`income-${month}`);
-		const expensesInput = document.getElementById(`expenses-${month}`);
-		if (incomeInput) {
-			incomeInput.addEventListener('input', () => {
+	incomeFields.forEach(id => {
+		const input = document.getElementById(id);
+		if (input) {
+			input.addEventListener('input', () => {
 				window.updateTotals();
 				saveData();
 			});
 		}
-		if (expensesInput) {
-			expensesInput.addEventListener('input', () => {
+	});
+	expensesFields.forEach(id => {
+		const input = document.getElementById(id);
+		if (input) {
+			input.addEventListener('input', () => {
 				window.updateTotals();
 				saveData();
 			});
@@ -136,12 +58,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 	loadData();
 
-	// Initialize chart if chart tab is visible on load
 	if (document.getElementById('chart').classList.contains('show')) {
 		setTimeout(window.updateChart, 100);
 	}
-
-	// Also initialize chart when chart tab is activated
 	const chartTabBtn = document.getElementById('chart-tab');
 	if (chartTabBtn) {
 		chartTabBtn.addEventListener('shown.bs.tab', function () {
