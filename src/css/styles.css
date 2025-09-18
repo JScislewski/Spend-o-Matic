@@ -1,0 +1,94 @@
+/* Responsive chart canvas height */
+#incomeExpensesChart {
+	max-height: 420px;
+	height: 50vh;
+	width: 100% !important;
+	display: block;
+	margin: 0 auto;
+}
+.bg-light.border {
+	border-color: #000 !important;
+}
+/* Force dark theme for all .bg-light and .form-control */
+.bg-light {
+	background-color: #23272b !important;
+	color: #f8f9fa !important;
+}
+
+.form-control {
+	background-color: #23272b !important;
+	color: #f8f9fa !important;
+	border: 1px solid #444 !important;
+}
+/* Custom dark cards and inputs for main container */
+.main-container .bg-light {
+	background-color: #23272b !important;
+	color: #f8f9fa !important;
+}
+
+main .form-control {
+	background-color: #23272b;
+	color: #f8f9fa;
+	border: 1px solid #444;
+}
+/* Custom navbar color */
+.custom-navbar {
+	background: linear-gradient(90deg, #102542 0%, #19376d 100%);
+}
+
+.custom-navbar .navbar-brand,
+.custom-navbar .nav-link {
+	color: #fff !important;
+}
+
+.custom-navbar .nav-link.active,
+.custom-navbar .nav-link:focus,
+.custom-navbar .nav-link:hover {
+	color: #ffd700 !important; /* gold highlight on hover/active */
+}
+/* ...existing code... */
+
+html {
+	min-height: 100vh;
+}
+
+body {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	background: rgb(33, 37, 41);
+}
+
+main {
+	flex: 1 0 auto;
+	background: rgb(33, 37, 41);
+	color: #f8f9fa;
+	border-radius: 0.5rem;
+	box-shadow: 0 2px 8px rgba(33, 37, 41, 0.08);
+	padding: 2rem;
+}
+
+.site-footer {
+	flex-shrink: 0;
+}
+
+/* Smaller footer variant controlled by .site-footer */
+.site-footer {
+	background: rgb(33, 37, 41);
+	color: #f8f9fa;
+	display: flex;
+	align-items: center;       /* vertical centering */
+	justify-content: center;   /* horizontal centering */
+	padding: 0.25rem 0;        /* small top/bottom padding */
+	min-height: 40px;         /* adjust to taste */
+	box-sizing: border-box;
+}
+
+.site-footer p {
+	margin: 0;
+}
+
+/* Smaller footer variant controlled by .site-footer */
+.site-footer {
+	background: rgb(33, 37, 41);
+}
